@@ -11,7 +11,6 @@ function App() {
     map: "แผนที่",
     analysis: "วิเคราะห์พื้นที่",
     compare: "เปรียบเทียบเขต",
-    settings: "ตั้งค่า",
   };
 
   return (

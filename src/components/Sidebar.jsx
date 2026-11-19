@@ -55,8 +55,8 @@ function MenuIcon({ type }) {
 
   return (
     <svg
-      width="15"
-      height="15"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -102,7 +102,7 @@ function Sidebar({ onNavigate }) {
               <MenuIcon type={item.icon} />
             </span>
 
-            <span className="text-[11px] whitespace-nowrap">
+            <span className="text-[15px] whitespace-nowrap">
               {item.label}
             </span>
           </button>
