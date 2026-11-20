@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
+import Dashboard from './Dashboard.jsx';
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home");
@@ -24,8 +25,9 @@ function App() {
 
         <main className="flex-1 min-w-0 p-6">
           <h2 className="text-xl font-semibold text-[#79554B]">
-            {pageTitles[currentPage]}
+            {pageTitles[currentPage]} 
           </h2>
+          {currentPage === "home" && <Dashboard />}
         </main>
 
       </div>
