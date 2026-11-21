@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 const menuItems = [
@@ -21,6 +20,11 @@ const menuItems = [
     id: "compare",
     label: "เปรียบเทียบเขต",
     icon: "compare",
+  },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "dashboard",
   },
 ];
 
@@ -49,6 +53,14 @@ function MenuIcon({ type }) {
       <>
         <rect x="3" y="4" width="8" height="16" rx="1" />
         <rect x="14" y="4" width="7" height="16" rx="1" />
+      </>
+    ),
+    dashboard: (
+      <>
+        <rect x="3" y="3" width="8" height="8" rx="1" />
+        <rect x="14" y="3" width="7" height="5" rx="1" />
+        <rect x="14" y="11" width="7" height="10" rx="1" />
+        <rect x="3" y="14" width="8" height="7" rx="1" />
       </>
     ),
   };
@@ -81,7 +93,6 @@ function Sidebar({ onNavigate }) {
     <aside className="w-[160px] min-h-[calc(100vh-67px)] flex shrink-0 bg-[#819B77]">
       {/* เมนู */}
       <nav className="flex-1 px-1.5 pt-5 flex flex-col gap-1">
-
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -102,12 +113,9 @@ function Sidebar({ onNavigate }) {
               <MenuIcon type={item.icon} />
             </span>
 
-            <span className="text-[15px] whitespace-nowrap">
-              {item.label}
-            </span>
+            <span className="text-[15px] whitespace-nowrap">{item.label}</span>
           </button>
         ))}
-
       </nav>
     </aside>
   );
