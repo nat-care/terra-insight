@@ -1,27 +1,68 @@
-import { useState } from "react"
-import Header from "./components/Header"
-import Sidebar from "./components/Sidebar"
-import Dashboard from "./Dashboard.jsx"
-import DistrictDetails from "./DistrictDetails.jsx"
+import { useState } from "react";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import Home from "./Home.jsx";
+import DistrictDetails from "./DistrictDetails.jsx";
 
 const districtNames = [
-  "พระนคร", "ดุสิต", "หนองจอก", "บางรัก", "บางเขน",
-  "บางกะปิ", "ปทุมวัน", "ป้อมปราบศัตรูพ่าย", "พระโขนง", "มีนบุรี",
-  "ลาดกระบัง", "ยานนาวา", "สัมพันธวงศ์", "พญาไท", "ธนบุรี",
-  "บางกอกใหญ่", "ห้วยขวาง", "คลองสาน", "ตลิ่งชัน", "บางกอกน้อย",
-  "บางขุนเทียน", "ภาษีเจริญ", "หนองแขม", "ราษฎร์บูรณะ", "บางพลัด",
-  "ดินแดง", "บึงกุ่ม", "สาทร", "บางซื่อ", "จตุจักร",
-  "บางคอแหลม", "ประเวศ", "คลองเตย", "สวนหลวง", "จอมทอง",
-  "ดอนเมือง", "ราชเทวี", "ลาดพร้าว", "วัฒนา", "บางแค",
-  "หลักสี่", "สายไหม", "คันนายาว", "สะพานสูง", "วังทองหลาง",
-  "คลองสามวา", "บางนา", "ทวีวัฒนา", "ทุ่งครุ", "บางบอน",
-]
+  "พระนคร",
+  "ดุสิต",
+  "หนองจอก",
+  "บางรัก",
+  "บางเขน",
+  "บางกะปิ",
+  "ปทุมวัน",
+  "ป้อมปราบศัตรูพ่าย",
+  "พระโขนง",
+  "มีนบุรี",
+  "ลาดกระบัง",
+  "ยานนาวา",
+  "สัมพันธวงศ์",
+  "พญาไท",
+  "ธนบุรี",
+  "บางกอกใหญ่",
+  "ห้วยขวาง",
+  "คลองสาน",
+  "ตลิ่งชัน",
+  "บางกอกน้อย",
+  "บางขุนเทียน",
+  "ภาษีเจริญ",
+  "หนองแขม",
+  "ราษฎร์บูรณะ",
+  "บางพลัด",
+  "ดินแดง",
+  "บึงกุ่ม",
+  "สาทร",
+  "บางซื่อ",
+  "จตุจักร",
+  "บางคอแหลม",
+  "ประเวศ",
+  "คลองเตย",
+  "สวนหลวง",
+  "จอมทอง",
+  "ดอนเมือง",
+  "ราชเทวี",
+  "ลาดพร้าว",
+  "วัฒนา",
+  "บางแค",
+  "หลักสี่",
+  "สายไหม",
+  "คันนายาว",
+  "สะพานสูง",
+  "วังทองหลาง",
+  "คลองสามวา",
+  "บางนา",
+  "ทวีวัฒนา",
+  "ทุ่งครุ",
+  "บางบอน",
+];
 
 const bangKhen = {
   name: "เขตบางเขน",
   englishName: "Bangkhen District",
   cluster: "Cluster 2 · โซนเหนือและการศึกษา",
-  description: "ย่านตอนเหนือของกรุงเทพฯ ที่มีสถานศึกษาและเชื่อมต่อรถไฟฟ้าสายสีเขียวกับสายสีชมพู",
+  description:
+    "ย่านตอนเหนือของกรุงเทพฯ ที่มีสถานศึกษาและเชื่อมต่อรถไฟฟ้าสายสีเขียวกับสายสีชมพู",
   totalDistricts: districtNames.length,
   totalClusters: 5,
   population: 190400,
@@ -39,20 +80,20 @@ const bangKhen = {
     { label: "การเดินทางและระบบราง", score: 8.8 },
     { label: "ความคุ้มค่าของที่อยู่อาศัย", score: 8.2 },
   ],
-}
+};
 
 const pageTitles = {
-  home: "หน้าแรก",
+  home: "HELLO มาหาพื้นที่ที่ใช่สำหรับคุณกัน!!",
   map: "แผนที่",
   analysis: "วิเคราะห์พื้นที่",
   compare: "เปรียบเทียบเขต",
-}
+};
 
 function findMockDistrict(name) {
-  if (!districtNames.includes(name)) return null
-  if (name === "บางเขน") return bangKhen
+  if (!districtNames.includes(name)) return null;
+  if (name === "บางเขน") return bangKhen;
 
-  const districtName = `เขต${name}`
+  const districtName = `เขต${name}`;
 
   return {
     name: districtName,
@@ -69,25 +110,25 @@ function findMockDistrict(name) {
       { label: "เขตที่หนาแน่นสูงสุด", value: 21347 },
     ],
     livabilityScores: bangKhen.livabilityScores,
-  }
+  };
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState("home")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState("home");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const isSearching = searchQuery !== ""
-  const normalizedQuery = searchQuery.replace(/\s+/g, "").replace(/^เขต/, "")
-  const foundDistrict = findMockDistrict(normalizedQuery)
+  const isSearching = searchQuery !== "";
+  const normalizedQuery = searchQuery.replace(/\s+/g, "").replace(/^เขต/, "");
+  const foundDistrict = findMockDistrict(normalizedQuery);
 
   function handleSearch(value) {
-    setSearchQuery(value.trim())
-    setCurrentPage("home")
+    setSearchQuery(value.trim());
+    setCurrentPage("home");
   }
 
   function handleNavigate(page) {
-    setSearchQuery("")
-    setCurrentPage(page)
+    setSearchQuery("");
+    setCurrentPage(page);
   }
 
   return (
@@ -104,8 +145,7 @@ export default function App() {
             </h2>
           )}
 
-          {currentPage === "home" && !isSearching && <Dashboard />}
-
+          {currentPage === "home" && !isSearching && <Home />}
           {currentPage === "home" && foundDistrict && (
             <DistrictDetails district={foundDistrict} />
           )}
@@ -118,5 +158,5 @@ export default function App() {
         </main>
       </div>
     </div>
-  )
+  );
 }
