@@ -45,7 +45,7 @@ export default function Home() {
       value: Math.round(selectedDistrict.population / selectedDistrict.area),
     },
     { label: "ค่าเฉลี่ยกรุงเทพฯ", value: 3600 },
-    { label: "เขตที่หนาแน่นสูงสุด", value: rankedDistricts[0].density },
+    // { label: "เขตที่หนาแน่นสูงสุด", value: rankedDistricts[0].density },
   ];
 
   const maxDensity = Math.max(...densityPreview.map((item) => item.value));
