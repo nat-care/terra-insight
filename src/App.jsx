@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
+import ComparePage from "./ComparePage.jsx";
 import Home from "./Home.jsx";
 import DistrictDetails from "./DistrictDetails.jsx";
 
@@ -86,7 +87,7 @@ const pageTitles = {
   home: "HELLO มาหาพื้นที่ที่ใช่สำหรับคุณกัน!!",
   map: "แผนที่",
   analysis: "วิเคราะห์พื้นที่",
-  compare: "เปรียบเทียบเขต",
+  compare: "ค้นหาเขตที่คล้ายกัน",
 };
 
 function findMockDistrict(name) {
@@ -146,6 +147,7 @@ export default function App() {
           )}
 
           {currentPage === "home" && !isSearching && <Home />}
+          {currentPage === "compare" && !isSearching && <ComparePage />}
           {currentPage === "home" && foundDistrict && (
             <DistrictDetails district={foundDistrict} />
           )}
