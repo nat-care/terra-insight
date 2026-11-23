@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import DistrictCompareCard from "./components/DistrictCompareCard";
 import UserInput from "./components/UserInput";
 import SummaryCards from "./components/SummaryCards";
 import MapSection from "./components/MapSection";
@@ -68,12 +68,15 @@ export default function Home() {
           <UserInput onSearch={handleSearch} />
         </section>
 
+      <div className="flex min-w-0 flex-col gap-4">
         <MapSection
           activeLayer={activeLayer}
           setActiveLayer={setActiveLayer}
           mapLayers={mapLayers}
         />
+        <DistrictCompareCard />
       </div>
+       </div>
 
       {/* ผลลัพธ์พื้นที่แนะนำ */}
       <RecommendedResults
