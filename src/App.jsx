@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import ComparePage from "./ComparePage.jsx";
 import Home from "./Home.jsx";
 import DistrictDetails from "./DistrictDetails.jsx";
+import Dashboard from "./components/Dashboard.jsx";
 
 const districtNames = [
   "พระนคร",
@@ -90,6 +91,8 @@ const pageTitles = {
   compare: "ค้นหาเขตที่คล้ายกัน",
 };
 
+
+
 function findMockDistrict(name) {
   if (!districtNames.includes(name)) return null;
   if (name === "บางเขน") return bangKhen;
@@ -148,6 +151,7 @@ export default function App() {
 
           {currentPage === "home" && !isSearching && <Home />}
           {currentPage === "compare" && !isSearching && <ComparePage />}
+          {currentPage === "dashboard" && !isSearching && <Dashboard />}
           {currentPage === "home" && foundDistrict && (
             <DistrictDetails district={foundDistrict} />
           )}
