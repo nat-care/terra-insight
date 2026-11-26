@@ -4,7 +4,7 @@ import Sidebar from "./components/Sidebar";
 import ComparePage from "./ComparePage.jsx";
 import Home from "./Home.jsx";
 import DistrictDetails from "./DistrictDetails.jsx";
-
+import MapPage from "./components/MapPage.jsx";
 const districtNames = [
   "พระนคร",
   "ดุสิต",
@@ -147,7 +147,9 @@ export default function App() {
           )}
 
           {currentPage === "home" && !isSearching && <Home />}
+          {currentPage === "map" && !isSearching && <MapPage />}
           {currentPage === "compare" && !isSearching && <ComparePage />}
+
           {currentPage === "home" && foundDistrict && (
             <DistrictDetails district={foundDistrict} />
           )}

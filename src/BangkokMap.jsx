@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 
+
 export default function BangkokMap({
   center = [13.7563, 100.5018],
   zoom = 11,
