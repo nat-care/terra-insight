@@ -5,7 +5,7 @@ import ComparePage from "./ComparePage.jsx";
 import Home from "./Home.jsx";
 import DistrictDetails from "./DistrictDetails.jsx";
 import Dashboard from "./components/Dashboard.jsx";
-
+// Mock data for districts and clusters
 const districtNames = [
   "พระนคร",
   "ดุสิต",
