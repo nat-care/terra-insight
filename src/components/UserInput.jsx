@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import logo from "../assets/flower.png";
 
@@ -28,7 +29,10 @@ const travelOptions = [
   "อื่น ๆ",
 ];
 
-export default function UserInput({ onSearch }) {
+export default function UserInput({
+  onSearch,
+  isLoading = false,
+}) {
   const [workType, setWorkType] = useState("ทำงานที่บ้าน");
   const [workLocation, setWorkLocation] = useState("");
   const [travel, setTravel] = useState(["รถยนต์"]);
@@ -39,11 +43,13 @@ export default function UserInput({ onSearch }) {
     setTravel((prev) =>
       prev.includes(option)
         ? prev.filter((item) => item !== option)
-        : [...prev, option],
+        : [...prev, option]
     );
   };
 
   const handleSearch = () => {
+    if (isLoading) return;
+
     if (!workLocation.trim()) {
       alert("กรุณากรอกสถานที่ทำงาน");
       return;
@@ -56,13 +62,14 @@ export default function UserInput({ onSearch }) {
 
     const data = {
       workType,
-      workLocation,
+      workLocation: workLocation.trim(),
       travel,
       distance,
-      factors,
+      factors: { ...factors },
     };
 
     console.log("User Preferences:", data);
+
     onSearch?.(data);
   };
 
@@ -73,7 +80,7 @@ export default function UserInput({ onSearch }) {
         <img
           src={logo}
           alt="TerraInsight"
-          className="w-[35px] h-[35px] object-contain"
+          className="h-[35px] w-[35px] object-contain"
         />
 
         <div>
@@ -97,8 +104,9 @@ export default function UserInput({ onSearch }) {
             <button
               key={item}
               type="button"
+              disabled={isLoading}
               onClick={() => setWorkType(item)}
-              className={`rounded-full border px-2.5 py-1.5 text-[10px] transition ${
+              className={`rounded-full border px-2.5 py-1.5 text-[10px] transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 workType === item
                   ? "border-[#64875B] bg-[#64875B] text-white"
                   : "border-[#E4D8CA] bg-white text-[#806D62] hover:bg-[#EAF0E5]"
@@ -119,9 +127,10 @@ export default function UserInput({ onSearch }) {
         <input
           type="text"
           value={workLocation}
+          disabled={isLoading}
           onChange={(e) => setWorkLocation(e.target.value)}
           placeholder="เช่น สยาม, อโศก, ลาดพร้าว"
-          className="w-full rounded-lg border border-[#E4D8CA] bg-white px-3 py-2 text-xs text-[#66584F] outline-none focus:border-[#64875B] focus:ring-1 focus:ring-[#64875B]/20"
+          className="w-full rounded-lg border border-[#E4D8CA] bg-white px-3 py-2 text-xs text-[#66584F] outline-none focus:border-[#64875B] focus:ring-1 focus:ring-[#64875B]/20 disabled:bg-gray-100"
         />
       </div>
 
@@ -136,8 +145,9 @@ export default function UserInput({ onSearch }) {
             <button
               key={option}
               type="button"
+              disabled={isLoading}
               onClick={() => toggleTravel(option)}
-              className={`rounded-md border px-1 py-2 text-[10px] transition ${
+              className={`rounded-md border px-1 py-2 text-[10px] transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 travel.includes(option)
                   ? "border-[#64875B] bg-[#E6EDDF] font-semibold text-[#52764E]"
                   : "border-[#E4D8CA] bg-white text-[#806D62] hover:bg-[#F2EDE5]"
@@ -167,8 +177,9 @@ export default function UserInput({ onSearch }) {
           min="1"
           max="20"
           value={distance}
+          disabled={isLoading}
           onChange={(e) => setDistance(Number(e.target.value))}
-          className="h-1.5 w-full cursor-pointer accent-[#64875B]"
+          className="h-1.5 w-full cursor-pointer accent-[#64875B] disabled:opacity-50"
         />
 
         <div className="flex justify-between text-[9px] text-[#A79588]">
@@ -206,13 +217,14 @@ export default function UserInput({ onSearch }) {
                 max="5"
                 step="1"
                 value={factors[factor.key]}
+                disabled={isLoading}
                 onChange={(e) =>
-                  setFactors({
-                    ...factors,
+                  setFactors((prev) => ({
+                    ...prev,
                     [factor.key]: Number(e.target.value),
-                  })
+                  }))
                 }
-                className="h-1.5 w-full cursor-pointer accent-[#64875B]"
+                className="h-1.5 w-full cursor-pointer accent-[#64875B] disabled:opacity-50"
               />
             </div>
           ))}
@@ -223,10 +235,11 @@ export default function UserInput({ onSearch }) {
       <button
         type="button"
         onClick={handleSearch}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C77F83] px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#B96E74] active:scale-[0.98]"
+        disabled={isLoading}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C77F83] px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#B96E74] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span>⌕</span>
-        Find Suitable Area
+        <span>{isLoading ? "◌" : "⌕"}</span>
+        {isLoading ? "กำลังวิเคราะห์พื้นที่..." : "Find Suitable Area"}
       </button>
 
       <p className="mt-2 text-center text-[9px] text-[#A79588]">
