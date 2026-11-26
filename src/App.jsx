@@ -4,12 +4,8 @@ import Sidebar from "./components/Sidebar";
 import ComparePage from "./ComparePage.jsx";
 import Home from "./Home.jsx";
 import DistrictDetails from "./DistrictDetails.jsx";
-<<<<<<< HEAD
 import MapPage from "./components/MapPage.jsx";
-=======
 import Dashboard from "./components/Dashboard.jsx";
-// Mock data for districts and clusters
->>>>>>> b3709e18b112e7147c6d18571d17574ceae6c0e9
 const districtNames = [
   "พระนคร",
   "ดุสิต",
@@ -156,11 +152,9 @@ export default function App() {
           {currentPage === "home" && !isSearching && <Home />}
           {currentPage === "map" && !isSearching && <MapPage />}
           {currentPage === "compare" && !isSearching && <ComparePage />}
-<<<<<<< HEAD
 
-=======
+
           {currentPage === "dashboard" && !isSearching && <Dashboard />}
->>>>>>> b3709e18b112e7147c6d18571d17574ceae6c0e9
           {currentPage === "home" && foundDistrict && (
             <DistrictDetails district={foundDistrict} />
           )}
