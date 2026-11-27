@@ -1,11 +1,11 @@
 const detailFields = [
   { key: "population", label: "ประชากร", unit: "คน" },
-  { key: "health", label: "สถานพยาบาล", unit: "แห่ง" },
-  { key: "schools", label: "โรงเรียน", unit: "แห่ง" },
-  { key: "malls", label: "ห้างสรรพสินค้า", unit: "แห่ง" },
-  { key: "temples", label: "วัด", unit: "แห่ง" },
-  { key: "universities", label: "มหาวิทยาลัย", unit: "แห่ง" },
-  { key: "risk", label: "จุดเสี่ยง", unit: "จุด" },
+  { key: "health", label: "สถานพยาบาลเฉลี่ย", unit: "แห่ง" },
+  { key: "schools", label: "โรงเรียนเฉลี่ย", unit: "แห่ง" },
+  { key: "malls", label: "ห้างสรรพสินค้าเฉลี่ย", unit: "แห่ง" },
+  { key: "temples", label: "วัดเฉลี่ย", unit: "แห่ง" },
+  { key: "universities", label: "มหาวิทยาลัยเฉลี่ย", unit: "แห่ง" },
+  { key: "risk", label: "จุดเสี่ยงเฉลี่ย", unit: "จุด" },
 ];
 
 export default function RecommendedResults({
