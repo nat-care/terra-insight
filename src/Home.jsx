@@ -12,7 +12,7 @@ import { summaryCards, mapLayers, districtPreview } from "./data/Exdata";
 import logo from "./assets/flower.png";
 
 // URL ของ Backend
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "https://backend-terrainsight.onrender.com";
 
 export default function Home() {
   const [activeLayer, setActiveLayer] = useState("ภาพรวม");

@@ -2,7 +2,7 @@
 // Endpoint: GET /api/districts/profiles
 // ใช้ VITE_API_URL ตัวเดียวกับ services/api.js (ถ้าไม่ตั้ง ใช้ http://localhost:3000)
 const API_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:3000"
+  import.meta.env.VITE_API_URL || "VITE_API_URL=https://backend-terrainsight.onrender.com"
 ).replace(/\/$/, "");
 
 export async function fetchDistrictProfiles({ signal } = {}) {
