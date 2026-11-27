@@ -2,8 +2,6 @@ import { useState } from "react";
 
 import { getDashboard } from "../api/dashboardApi.js";
 import { useApi } from "../api/useDashboardApi.js";
-import RecommendedResults from "../components/RecommendedResults";
-import logo from "../assets/flower.png";
 import "./Dashboard.css";
 
 const STORAGE_KEY = "terra-insight:recommendations";
@@ -706,11 +704,7 @@ export default function Dashboard() {
     <section className="ti-dashboard" lang="th">
       <h1 className="ti-title">ข้อมูลเขตที่แนะนำ</h1>
 
-      <RecommendedResults
-        recommendations={recommendations ?? []}
-        hasSearched={recommendations !== null}
-        logo={logo}
-      />
+      
 
       {recommendations?.length > 0 && (
         <DashboardComparison recommendations={recommendations} />
