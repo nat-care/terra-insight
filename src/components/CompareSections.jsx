@@ -1,4 +1,6 @@
-import { getBaseTags } from "../utils/compare";
+import { describeBase, getBaseTags } from "../utils/compare";
+
+const formatNumber = (n) => n.toLocaleString("th-TH");
 
 // หัวข้อที่มีวงกลมเลข ① ② ③ — ใช้แค่ในไฟล์นี้ จึงไม่ต้อง export
 function StepHeading({ step, children }) {
@@ -14,12 +16,14 @@ function StepHeading({ step, children }) {
 
 // ① เลือกเขตต้นแบบ + การ์ดสีชมพู
 export function BaseDistrictPicker({
-  options,
+  model,
   base,
   onBaseChange,
-  sameClusterOnly,
-  onSameClusterChange,
+  sameGroupOnly,
+  onSameGroupChange,
 }) {
+  const tags = getBaseTags(model, base);
+
   return (
     <section className="grid grid-cols-1 gap-4 rounded-2xl border border-[#E8DDD0] bg-[#FFFDF8] p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
       {/* ซ้าย: เลือกเขต */}
@@ -38,9 +42,9 @@ export function BaseDistrictPicker({
           onChange={(e) => onBaseChange(e.target.value)}
           className="mt-1 h-9 w-full rounded-lg border border-[#C3B2A9] bg-white px-3 text-sm text-[#51443D] outline-none focus:border-[#71845D]"
         >
-          {options.map((o) => (
+          {model.districts.map((o) => (
             <option key={o.id} value={o.id}>
-              เขต{o.name} 
+              เขต{o.name}
             </option>
           ))}
         </select>
@@ -48,11 +52,11 @@ export function BaseDistrictPicker({
         <label className="mt-3 flex items-center gap-2 text-xs text-[#79554B]">
           <input
             type="checkbox"
-            checked={sameClusterOnly}
-            onChange={(e) => onSameClusterChange(e.target.checked)}
+            checked={sameGroupOnly}
+            onChange={(e) => onSameGroupChange(e.target.checked)}
             className="h-4 w-4 accent-[#536F4C]"
           />
-          ค้นเฉพาะเขตในกลุ่มเดียวกัน
+          ค้นเฉพาะเขตที่อยู่กลุ่มเดียวกัน ({base.group.name})
         </label>
       </div>
 
@@ -60,16 +64,21 @@ export function BaseDistrictPicker({
       <div className="rounded-xl bg-[#F3DCD8] p-4">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-2xl font-bold text-[#5A3A32]">{base.name}</h2>
-          
           <span className="rounded-full bg-white px-2 py-0.5 text-[11px] text-[#5A3A32]">
             ต้นแบบ
           </span>
         </div>
 
-        <p className="mt-2 text-sm text-[#51443D]">{base.summary}</p>
+        <p className="mt-2 text-sm text-[#51443D]">{describeBase(model, base)}</p>
+        <p className="mt-1 text-xs text-[#79554B]">
+          ประชากร {base.population == null ? "ไม่มีข้อมูล" : `${formatNumber(base.population)} คน`}
+        </p>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          {getBaseTags(base).map((tag) => (
+          {tags.length === 0 && (
+            <span className="text-[11px] text-[#79554B]">ไม่มีด้านที่โดดเด่นกว่าเขตอื่น</span>
+          )}
+          {tags.map((tag) => (
             <span
               key={tag}
               className="rounded-full bg-[#DCE5D3] px-2.5 py-1 text-[11px] text-[#536F4C]"
@@ -117,6 +126,7 @@ export function SimilarDistrictList({ items, selectedId, onSelect }) {
                     {item.label} {item.score}%
                   </span>
                 </div>
+                <p className="mt-1 text-[11px] text-[#A79588]">{item.group.name}</p>
                 <p className="mt-1 text-xs text-[#79554B]">{item.reason}</p>
               </button>
             </li>
@@ -128,10 +138,11 @@ export function SimilarDistrictList({ items, selectedId, onSelect }) {
 }
 
 // ③ เหมือนกันตรงไหน ต่างกันตรงไหน
+// โมเดลวัดเป็นจำนวน จึงบอกแค่ มาก/น้อยกว่า ไม่ตัดสินว่าดีหรือแย่
 const groupStyles = {
-  same: { title: "เหมือนกัน", icon: "=", box: "bg-[#E3EBD9]", badge: "bg-[#536F4C]" },
-  better: { title: "ดีกว่า", icon: "+", box: "bg-[#DCE5EE]", badge: "bg-[#3F5A78]" },
-  worse: { title: "ด้อยกว่า", icon: "−", box: "bg-[#F3DCD8]", badge: "bg-[#8A4B45]" },
+  same: { title: "ใกล้เคียงกัน", icon: "=", box: "bg-[#E3EBD9]", badge: "bg-[#536F4C]" },
+  more: { title: "มีมากกว่า", icon: "+", box: "bg-[#DCE5EE]", badge: "bg-[#3F5A78]" },
+  less: { title: "มีน้อยกว่า", icon: "−", box: "bg-[#F3DCD8]", badge: "bg-[#8A4B45]" },
 };
 
 function FeatureGroup({ type, items }) {
@@ -181,13 +192,11 @@ export function SimilarityBreakdown({ comparison }) {
             {comparison.summary}
           </p>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <FeatureGroup type="same" items={comparison.same} />
-            <FeatureGroup type="better" items={comparison.better} />
-            <FeatureGroup type="worse" items={comparison.worse} />
+            <FeatureGroup type="more" items={comparison.more} />
+            <FeatureGroup type="less" items={comparison.less} />
           </div>
-
-          
         </div>
       )}
     </section>
