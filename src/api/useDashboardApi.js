@@ -1,8 +1,9 @@
 // useDashboardApi.js: hook ที่หน้า Dashboard ใช้
 //   useApi: จำสถานะ กำลังโหลด / ได้ข้อมูล / error
 //   useDistrictSearch: ช่องค้นหาเขต รอหยุดพิมพ์ 0.3 วิ แล้วค่อยค้น
+//   useDistrictDetails: หน้ารายละเอียดเขต เมื่อค้นหาจาก navbar
 import { useCallback, useEffect, useState } from "react";
-import { searchDistricts } from "./dashboardApi.js";
+import { getDistrictDetails, getDistrictGroups, searchDistricts } from "./dashboardApi.js";
 
 // ---------- useApi ----------
 
@@ -57,4 +58,36 @@ export function useDistrictSearch(query, { delay = 300, limit = 10 } = {}) {
     error,
     searched: debounced.length > 0,
   };
+}
+
+// ---------- useDistrictDetails ----------
+
+// หากลุ่มหลักของเขตจากผล /api/districts/profiles (ชื่อกลุ่มมาจากโมเดลโดยตรง)
+function findDistrictGroup(profiles, shortName) {
+  const row = profiles?.districts?.find(({ id, name }) => id === shortName || name === shortName);
+  if (row?.dominant_group == null) return {};
+  const clusterId = Number(row.dominant_group);
+  const clusterName = profiles.meta?.groups?.find(({ id }) => Number(id) === clusterId)?.name ?? null;
+  return { clusterId, clusterName };
+}
+
+// ดึงรายละเอียดเขต + กลุ่มพื้นที่ของโมเดล (ถ้าโมเดลยังไม่พร้อม แสดงข้อมูลเขตได้ตามปกติ แค่ไม่มีป้าย Cluster)
+export function useDistrictDetails(query) {
+  const name = query.trim();
+  const enabled = name.length > 0;
+  const details = useApi((signal) => getDistrictDetails(name, signal), [name], { enabled });
+  const groups = useApi(
+    (signal) => getDistrictGroups(signal).catch((error) => {
+      if (error.name === "AbortError") throw error;
+      return null;
+    }),
+    [],
+    { enabled },
+  );
+
+  const district = details.data
+    ? { ...details.data, ...findDistrictGroup(groups.data, details.data.shortName) }
+    : null;
+
+  return { district, loading: details.loading, error: details.error, reload: details.reload };
 }

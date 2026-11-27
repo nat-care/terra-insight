@@ -88,3 +88,10 @@ export const checkModel = (signal) =>
 
 export const predictGroup = (features, signal) =>
   apiPost("/predict", features, signal);
+// รายละเอียดเขตสำหรับหน้าค้นหาจาก navbar (DistrictDetails) รับชื่อหรือรหัสเขต
+// ถ้าไม่เจอเขต จะได้ error 404 ที่มี body.suggestions เป็นรายชื่อเขตที่ใกล้เคียง
+export const getDistrictDetails = (idOrName, signal) =>
+  apiGet(`/api/district-details/${encodeURIComponent(idOrName)}`, undefined, signal);
+
+// กลุ่มพื้นที่รายเขตจากโมเดลของเพื่อน (อ่านอย่างเดียว) ใช้ทำป้าย Cluster
+export const getDistrictGroups = (signal) => apiGet("/api/districts/profiles", undefined, signal);
