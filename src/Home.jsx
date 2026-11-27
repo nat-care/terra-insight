@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import DistrictCompareCard from "./components/DistrictCompareCard";
 import UserInput from "./components/UserInput";
-import SummaryCards from "./components/SummaryCards";
 import MapSection from "./components/MapSection";
 import RecommendedResults from "./components/RecommendedResults";
 import { predictAreas } from "./services/api";
@@ -65,7 +64,6 @@ export default function Home() {
         ค้นหาพื้นที่อยู่อาศัยที่เหมาะสมกับความต้องการของคุณในกรุงเทพมหานคร
       </p>
 
-      <SummaryCards cards={summaryCards} />
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.5fr)]">
         <section className="min-w-0 rounded-xl border border-[#DCCABB] bg-white p-3">
