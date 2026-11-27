@@ -80,7 +80,7 @@ export default function Home() {
             recommendations={recommendations}
           />
 
-          <DistrictCompareCard />
+          <DistrictCompareCard recommendations={recommendations} />
         </div>
       </div>
 

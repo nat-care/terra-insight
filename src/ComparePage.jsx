@@ -12,12 +12,52 @@ import {
   compareDistricts,
 } from "./utils/compare";
 
+const STORAGE_KEY = "terra-insight:recommendations";
+
+function readRecommendations() {
+  try {
+    const saved = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeDistrictName(name) {
+  return typeof name === "string"
+    ? name.trim().replace(/^เขต\s*/, "").trim()
+    : "";
+}
+
+function findRecommendedDistrict(districts, recommendations) {
+  const districtsByName = new Map(
+    districts.map((district) => [
+      normalizeDistrictName(district.name),
+      district,
+    ]),
+  );
+
+  for (const area of recommendations) {
+    const districtName = normalizeDistrictName(area?.district);
+    const areaName = normalizeDistrictName(area?.name);
+
+    const match =
+      (districtName && districtsByName.get(districtName)) ||
+      (areaName && districtsByName.get(areaName));
+
+    if (match) return match;
+  }
+
+  return null;
+}
+
 export default function ComparePage() {
   const [result, setResult] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [baseId, setBaseId] = useState(null);
   const [sameGroupOnly, setSameGroupOnly] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [recommendations] = useState(readRecommendations);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -31,11 +71,17 @@ export default function ComparePage() {
     return () => controller.abort();
   }, []);
 
-  const model = useMemo(() => (result ? buildCompareModel(result) : null), [result]);
+  const model = useMemo(
+    () => (result ? buildCompareModel(result) : null),
+    [result],
+  );
 
   if (loadError) {
     return (
-      <p role="alert" className="mt-3 rounded-xl bg-white p-4 text-sm text-[#8A4B45]">
+      <p
+        role="alert"
+        className="mt-3 rounded-xl bg-white p-4 text-sm text-[#8A4B45]"
+      >
         โหลดข้อมูลเขตไม่สำเร็จ: {loadError}
       </p>
     );
@@ -43,7 +89,10 @@ export default function ComparePage() {
 
   if (!model) {
     return (
-      <p role="status" className="mt-3 rounded-xl bg-white p-4 text-sm text-[#A79588]">
+      <p
+        role="status"
+        className="mt-3 rounded-xl bg-white p-4 text-sm text-[#A79588]"
+      >
         กำลังโหลดข้อมูลเขต…
       </p>
     );
@@ -51,17 +100,22 @@ export default function ComparePage() {
 
   if (model.districts.length < 2) {
     return (
-      <p role="status" className="mt-3 rounded-xl bg-white p-4 text-sm text-[#A79588]">
+      <p
+        role="status"
+        className="mt-3 rounded-xl bg-white p-4 text-sm text-[#A79588]"
+      >
         ยังมีข้อมูลเขตไม่พอสำหรับการเปรียบเทียบ
       </p>
     );
   }
 
-  const base = findDistrict(model, baseId) ?? model.districts[0];
-  const similar = findSimilarDistricts(model, base, sameGroupOnly);
+  const base =
+    findDistrict(model, baseId) ??
+    findRecommendedDistrict(model.districts, recommendations) ??
+    model.districts[0];
 
-  // ถ้ายังไม่ได้คลิกเลือก (หรือตัวที่เลือกหายไปจากรายการ) ใช้อันดับ 1
-  const active = similar.find((d) => d.id === selectedId) ?? similar[0];
+  const similar = findSimilarDistricts(model, base, sameGroupOnly);
+  const active = similar.find((district) => district.id === selectedId) ?? similar[0];
   const comparison = active ? compareDistricts(model, base, active) : null;
 
   function handleBaseChange(id) {

@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-// mock ข้อมูลเขต — ภายหลังเปลี่ยนเป็นข้อมูลจริง/จากโมเดลได้
-// risk.level: "low" = เขียว, "medium" = เหลือง, "high" = ชมพู
+// ข้อมูลตัวอย่างสำหรับตารางเปรียบเทียบ
 const districtStats = [
   {
     id: "chatuchak",
@@ -63,13 +62,18 @@ const riskStyles = {
 
 const formatNumber = (n) => n.toLocaleString("th-TH");
 
-// แถวในตาราง: [ชื่อแถว, ฟังก์ชันดึงค่าจากข้อมูลเขต]
 const rows = [
   ["ความหนาแน่น", (d) => `${formatNumber(d.density)} คน/ตร.กม.`],
   ["จำนวนโรงเรียน", (d) => `${d.schools} แห่ง`],
   ["โรงพยาบาล", (d) => `${d.hospitals} แห่ง`],
   ["ระบบขนส่ง", (d) => d.transport],
 ];
+
+function normalizeDistrictName(name) {
+  if (typeof name !== "string") return "";
+
+  return name.trim().replace(/^เขต\s*/, "").trim();
+}
 
 function ScaleIcon() {
   return (
@@ -82,6 +86,7 @@ function ScaleIcon() {
       strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
     >
       <path d="M12 3v18M7 21h10M5 7h14M12 5l-7 2M12 5l7 2" />
       <path d="m5 7-3 6a3 3 0 0 0 6 0z" />
@@ -96,6 +101,7 @@ function DistrictSelect({ id, label, value, disabledId, onChange }) {
       <label htmlFor={id} className="text-xs text-[#A79588]">
         {label}
       </label>
+
       <select
         id={id}
         value={value}
@@ -119,7 +125,9 @@ function CompareRow({ label, left, right }) {
       <div className="text-center text-[11px] leading-tight text-[#A79588]">
         {label}
       </div>
-      <div className="text-right text-sm font-semibold text-[#79554B]">{right}</div>
+      <div className="text-right text-sm font-semibold text-[#79554B]">
+        {right}
+      </div>
     </div>
   );
 }
@@ -134,29 +142,42 @@ function RiskChip({ risk }) {
   );
 }
 
-export default function DistrictCompareCard() {
+export default function DistrictCompareCard({ recommendations = [] }) {
   const [leftId, setLeftId] = useState(districtStats[0].id);
   const [rightId, setRightId] = useState(districtStats[1].id);
 
   const left = districtStats.find((d) => d.id === leftId);
   const right = districtStats.find((d) => d.id === rightId);
 
+  const recommendedDistricts = [
+    ...new Set(
+      recommendations
+        .map(
+          (area) =>
+            normalizeDistrictName(area?.district) ||
+            normalizeDistrictName(area?.name),
+        )
+        .filter(Boolean),
+    ),
+  ];
+
   return (
     <section className="min-w-0 rounded-xl border border-[#DCCABB] bg-white p-4">
-      {/* หัวการ์ด */}
       <div className="flex items-center gap-3 border-b border-[#E8DDD0] pb-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#F3DCD8] text-[#79554B]">
           <ScaleIcon />
         </span>
+
         <div>
           <h2 className="text-base font-semibold text-[#51443D]">
             การเลือกเขตที่ต้องการเปรียบเทียบ
           </h2>
-          <p className="text-xs text-[#A79588]">เปรียบเทียบเชิงลึกตัวต่อตัว 2 เขต</p>
+          <p className="text-xs text-[#A79588]">
+            เปรียบเทียบเชิงลึกตัวต่อตัว 2 เขต
+          </p>
         </div>
       </div>
 
-      {/* เลือก 2 เขต (เลือกเขตเดียวกันทั้งสองฝั่งไม่ได้) */}
       <div className="mt-3 grid grid-cols-2 gap-3">
         <DistrictSelect
           id="compare-left"
@@ -174,7 +195,25 @@ export default function DistrictCompareCard() {
         />
       </div>
 
-      {/* ตารางเปรียบเทียบ */}
+      {recommendedDistricts.length > 0 && (
+        <div className="mt-4 rounded-xl bg-[#FAF5EC] p-3">
+          <h3 className="text-xs font-semibold text-[#51443D]">
+            เขตจากผลการค้นหา
+          </h3>
+
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {recommendedDistricts.map((name) => (
+              <li
+                key={name}
+                className="rounded-full bg-[#DCE9D5] px-2.5 py-1 text-xs text-[#36513D]"
+              >
+                เขต{name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="mt-4 rounded-xl bg-[#F8F3ED] px-4 py-1">
         <CompareRow
           label="ประชากร"
