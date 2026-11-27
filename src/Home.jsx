@@ -1,11 +1,9 @@
 import { useState } from "react";
 
-import DistrictCompareCard from "./components/DistrictCompareCard";
 import UserInput from "./components/UserInput";
 import MapSection from "./components/MapSection";
 import RecommendedResults from "./components/RecommendedResults";
 import { predictAreas } from "./services/api";
-import { summaryCards, mapLayers } from "./data/Exdata";
 import logo from "./assets/flower.png";
 
 const STORAGE_KEY = "terra-insight:recommendations";
@@ -21,7 +19,6 @@ function readRecommendations() {
 }
 
 export default function Home() {
-  const [activeLayer, setActiveLayer] = useState("ภาพรวม");
   const [results, setResults] = useState(readRecommendations);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -71,14 +68,7 @@ export default function Home() {
         </section>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <MapSection
-            activeLayer={activeLayer}
-            setActiveLayer={setActiveLayer}
-            mapLayers={mapLayers}
-            recommendations={recommendations}
-          />
-
-          <DistrictCompareCard recommendations={recommendations} />
+         <MapSection recommendations={recommendations} />
         </div>
       </div>
 

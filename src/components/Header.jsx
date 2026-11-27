@@ -1,17 +1,8 @@
-
-import { useState } from "react";
 import logo from "../assets/logo-map.png";
 
-function Header({ onSearch }) {
-  const [search, setSearch] = useState("");
-
-  const handleSearch = () => {
-    onSearch?.(search);
-  };
-
+function Header({ onReset }) {
   const handleReset = () => {
-    setSearch("");
-    onSearch?.("");
+    onReset?.();
   };
 
   return (
@@ -38,38 +29,8 @@ function Header({ onSearch }) {
 
       </div>
 
-      {/* Search */}
-      <div className="flex-1 h-[35px] flex items-center bg-[#EFE9DB] border border-[#C3B2A9] rounded-[7px] px-3">
-
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
-          }}
-          className="flex-1 w-full h-full outline-none bg-transparent text-sm text-[#51443D]"
-        />
-
-        <button
-          onClick={handleSearch}
-          aria-label="ค้นหา"
-          className="text-[#171717] hover:text-[#71845D] transition"
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <circle cx="11" cy="11" r="7.5" />
-            <path d="m16.5 16.5 5 5" />
-          </svg>
-        </button>
-
-      </div>
+      {/* ตัวดันปุ่มเริ่มใหม่ไปชิดขวา */}
+      <div className="flex-1" />
 
       {/* Reset */}
       <button
