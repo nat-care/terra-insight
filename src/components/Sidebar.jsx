@@ -11,11 +11,7 @@ const menuItems = [
     label: "แผนที่",
     icon: "map",
   },
-  {
-    id: "analysis",
-    label: "วิเคราะห์พื้นที่",
-    icon: "chart",
-  },
+
   {
     id: "compare",
     label: "เปรียบเทียบเขต",

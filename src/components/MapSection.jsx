@@ -1,6 +1,11 @@
 import BangkokMap from "../BangkokMap";
 
-export default function MapSection({ activeLayer, setActiveLayer, mapLayers }) {
+export default function MapSection({
+  activeLayer,
+  setActiveLayer,
+  mapLayers,
+  recommendations,
+}) {
   return (
     <section className="min-w-0 rounded-xl border border-[#DCCABB] bg-white p-4">
       <h2 className="text-base font-semibold text-[#79554B]">
@@ -32,7 +37,7 @@ export default function MapSection({ activeLayer, setActiveLayer, mapLayers }) {
       )}
 
       <div className="mt-3 overflow-hidden rounded-lg">
-        <BangkokMap />
+        <BangkokMap recommendations={recommendations} />
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
-
-import { useState } from "react";
+import { useId, useState } from "react";
 import logo from "../assets/flower.png";
+
+const PHOTON_URL = "https://photon.komoot.io/api/";
 
 const initialFactors = {
   safety: 5,
@@ -20,6 +21,8 @@ const factorList = [
   { key: "transport", label: "การเดินทาง" },
 ];
 
+const workTypes = ["ทำงานที่บ้าน", "ทำงานออฟฟิศ", "Hybrid"];
+
 const travelOptions = [
   "รถยนต์",
   "รถเมล์",
@@ -29,29 +32,137 @@ const travelOptions = [
   "อื่น ๆ",
 ];
 
-export default function UserInput({
-  onSearch,
-  isLoading = false,
-}) {
+function formatLocationResult(feature) {
+  const place = feature.properties ?? {};
+  const streetAddress = [place.housenumber, place.street]
+    .filter(Boolean)
+    .join(" ");
+
+  const name = place.name || streetAddress || place.district || place.city;
+  if (!name) return null;
+
+  const addressParts = [
+    streetAddress,
+    place.district,
+    place.city,
+    place.state,
+    place.postcode,
+  ].filter((part) => part && part !== name);
+
+  return {
+    name,
+    address: [...new Set(addressParts)].join(", "),
+  };
+}
+
+export default function UserInput({ onSearch, isLoading = false }) {
+  const formId = useId();
   const [workType, setWorkType] = useState("ทำงานที่บ้าน");
   const [workLocation, setWorkLocation] = useState("");
   const [travel, setTravel] = useState(["รถยนต์"]);
   const [distance, setDistance] = useState(5);
   const [factors, setFactors] = useState(initialFactors);
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [locationResults, setLocationResults] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationMessage, setLocationMessage] = useState("");
 
-  const toggleTravel = (option) => {
-    setTravel((prev) =>
-      prev.includes(option)
-        ? prev.filter((item) => item !== option)
-        : [...prev, option]
+  const isBusy = isLoading || isLookingUp;
+
+  function toggleTravel(option) {
+    setTravel((previous) =>
+      previous.includes(option)
+        ? previous.filter((item) => item !== option)
+        : [...previous, option]
     );
-  };
+  }
 
-  const handleSearch = () => {
-    if (isLoading) return;
+  function handleLocationChange(event) {
+    setWorkLocation(event.target.value);
+    setSelectedLocation(null);
+    setLocationResults([]);
+    setLocationMessage("");
+  }
 
-    if (!workLocation.trim()) {
-      alert("กรุณากรอกสถานที่ทำงาน");
+  async function handleLookup() {
+    if (isBusy) return;
+
+    const query = workLocation.trim();
+
+    setSelectedLocation(null);
+    setLocationResults([]);
+
+    if (!query) {
+      setLocationMessage("กรุณากรอกชื่อสถานที่หรือที่อยู่");
+      return;
+    }
+
+    setLocationMessage("");
+    setIsLookingUp(true);
+
+    try {
+      const url = new URL(PHOTON_URL);
+      url.searchParams.set("q", query);
+      url.searchParams.set("limit", "5");
+      url.searchParams.set("lat", "13.7563");
+      url.searchParams.set("lon", "100.5018");
+
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Photon HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!Array.isArray(data.features)) {
+        throw new Error("Invalid location search response");
+      }
+
+      const results = data.features
+        .map(formatLocationResult)
+        .filter(Boolean);
+
+      const uniqueResults = [
+        ...new Map(
+          results.map((result) => [
+            JSON.stringify([result.name, result.address]),
+            result,
+          ])
+        ).values(),
+      ];
+
+      setLocationResults(uniqueResults);
+
+      if (uniqueResults.length === 0) {
+        setLocationMessage(
+          "ไม่พบผลจากที่อยู่นี้ ลองค้นด้วยชื่อสถานที่ หรือชื่อถนนและเขต"
+        );
+      }
+    } catch {
+      setLocationMessage(
+        "ค้นหาที่อยู่ไม่สำเร็จ ลองอีกครั้ง หรือกรอกชื่อสถานที่แล้วกด Find Suitable Area"
+      );
+    } finally {
+      setIsLookingUp(false);
+    }
+  }
+
+  function handleSelectLocation(location) {
+    setSelectedLocation(location);
+    setLocationResults([]);
+    setLocationMessage("");
+  }
+
+  function handleSearch() {
+    if (isBusy) return;
+
+    const location = selectedLocation?.name || workLocation.trim();
+
+    if (!location) {
+      setLocationMessage("กรุณากรอกสถานที่ทำงาน");
       return;
     }
 
@@ -60,22 +171,17 @@ export default function UserInput({
       return;
     }
 
-    const data = {
+    onSearch?.({
       workType,
-      workLocation: workLocation.trim(),
+      workLocation: location,
       travel,
       distance,
       factors: { ...factors },
-    };
-
-    console.log("User Preferences:", data);
-
-    onSearch?.(data);
-  };
+    });
+  }
 
   return (
     <div className="w-full">
-      {/* Header */}
       <div className="mb-3 flex items-center gap-2">
         <img
           src={logo}
@@ -93,18 +199,18 @@ export default function UserInput({
         </div>
       </div>
 
-      {/* Work Type */}
       <div className="mb-3">
-        <label className="mb-1.5 block text-xs font-semibold text-[#806D62]">
+        <p className="mb-1.5 text-xs font-semibold text-[#806D62]">
           รูปแบบการทำงาน
-        </label>
+        </p>
 
         <div className="flex flex-wrap gap-1">
-          {["ทำงานที่บ้าน", "ทำงานออฟฟิศ", "Hybrid"].map((item) => (
+          {workTypes.map((item) => (
             <button
               key={item}
               type="button"
-              disabled={isLoading}
+              disabled={isBusy}
+              aria-pressed={workType === item}
               onClick={() => setWorkType(item)}
               className={`rounded-full border px-2.5 py-1.5 text-[10px] transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 workType === item
@@ -118,34 +224,101 @@ export default function UserInput({
         </div>
       </div>
 
-      {/* Work Location */}
       <div className="mb-3">
-        <label className="mb-1.5 block text-xs font-semibold text-[#806D62]">
+        <label
+          htmlFor={`${formId}-location`}
+          className="mb-1.5 block text-xs font-semibold text-[#806D62]"
+        >
           สถานที่ทำงาน
         </label>
 
         <input
+          id={`${formId}-location`}
           type="text"
           value={workLocation}
-          disabled={isLoading}
-          onChange={(e) => setWorkLocation(e.target.value)}
-          placeholder="เช่น สยาม, อโศก, ลาดพร้าว"
+          disabled={isBusy}
+          onChange={handleLocationChange}
+          placeholder="เช่น มหาวิทยาลัยศรีปทุม หรือที่อยู่เต็ม"
           className="w-full rounded-lg border border-[#E4D8CA] bg-white px-3 py-2 text-xs text-[#66584F] outline-none focus:border-[#64875B] focus:ring-1 focus:ring-[#64875B]/20 disabled:bg-gray-100"
         />
+
+        <button
+          type="button"
+          onClick={handleLookup}
+          disabled={isBusy}
+          className="mt-2 rounded-md border border-[#64875B] px-2.5 py-1.5 text-[10px] font-semibold text-[#52764E] hover:bg-[#EAF0E5] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isLookingUp ? "กำลังค้นหาที่อยู่..." : "ค้นหาจากที่อยู่"}
+        </button>
+
+        {locationMessage && (
+          <p role="status" className="mt-2 text-[11px] text-[#9C4747]">
+            {locationMessage}
+          </p>
+        )}
+
+        {locationResults.length > 0 && (
+          <div className="mt-2">
+            <p className="mb-1 text-[11px] text-[#806D62]">
+              เลือกสถานที่ที่ตรงกับที่อยู่ของคุณ
+            </p>
+
+            <ul className="space-y-1">
+              {locationResults.map((location) => (
+                <li key={JSON.stringify([location.name, location.address])}>
+                  <button
+                    type="button"
+                    disabled={isBusy}
+                    onClick={() => handleSelectLocation(location)}
+                    className="w-full rounded-md border border-[#E4D8CA] bg-white px-3 py-2 text-left hover:bg-[#EAF0E5] disabled:opacity-50"
+                  >
+                    <span className="block text-xs font-semibold text-[#52764E]">
+                      {location.name}
+                    </span>
+
+                    {location.address && (
+                      <span className="mt-0.5 block text-[10px] text-[#806D62]">
+                        {location.address}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {selectedLocation && (
+          <p role="status" className="mt-2 text-[11px] text-[#52764E]">
+            ใช้ {selectedLocation.name} เป็นจุดอ้างอิง
+          </p>
+        )}
+
+        <p className="mt-1 text-[9px] text-[#806D62]">
+          ข้อมูลสถานที่ ©{" "}
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          >
+            OpenStreetMap contributors
+          </a>
+        </p>
       </div>
 
-      {/* Travel */}
       <div className="mb-3">
-        <label className="mb-2 block text-xs font-semibold text-[#806D62]">
+        <p className="mb-2 text-xs font-semibold text-[#806D62]">
           ความต้องการด้านการเดินทาง
-        </label>
+        </p>
 
         <div className="grid grid-cols-3 gap-1.5">
           {travelOptions.map((option) => (
             <button
               key={option}
               type="button"
-              disabled={isLoading}
+              disabled={isBusy}
+              aria-pressed={travel.includes(option)}
               onClick={() => toggleTravel(option)}
               className={`rounded-md border px-1 py-2 text-[10px] transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 travel.includes(option)
@@ -160,10 +333,12 @@ export default function UserInput({
         </div>
       </div>
 
-      {/* Distance */}
       <div className="mb-4">
         <div className="mb-1 flex items-center justify-between">
-          <label className="text-xs font-semibold text-[#806D62]">
+          <label
+            htmlFor={`${formId}-distance`}
+            className="text-xs font-semibold text-[#806D62]"
+          >
             ระยะทางที่ยอมรับได้
           </label>
 
@@ -173,12 +348,13 @@ export default function UserInput({
         </div>
 
         <input
+          id={`${formId}-distance`}
           type="range"
           min="1"
           max="20"
           value={distance}
-          disabled={isLoading}
-          onChange={(e) => setDistance(Number(e.target.value))}
+          disabled={isBusy}
+          onChange={(event) => setDistance(Number(event.target.value))}
           className="h-1.5 w-full cursor-pointer accent-[#64875B] disabled:opacity-50"
         />
 
@@ -188,7 +364,6 @@ export default function UserInput({
         </div>
       </div>
 
-      {/* Importance Factors */}
       <div className="mb-4">
         <h3 className="mb-1 text-xs font-bold text-[#806D62]">
           ความสำคัญของแต่ละปัจจัย
@@ -202,7 +377,10 @@ export default function UserInput({
           {factorList.map((factor) => (
             <div key={factor.key}>
               <div className="mb-1 flex items-center justify-between">
-                <label className="text-[11px] text-[#806D62]">
+                <label
+                  htmlFor={`${formId}-${factor.key}`}
+                  className="text-[11px] text-[#806D62]"
+                >
                   {factor.label}
                 </label>
 
@@ -212,18 +390,20 @@ export default function UserInput({
               </div>
 
               <input
+                id={`${formId}-${factor.key}`}
                 type="range"
                 min="1"
                 max="5"
                 step="1"
                 value={factors[factor.key]}
-                disabled={isLoading}
-                onChange={(e) =>
-                  setFactors((prev) => ({
-                    ...prev,
-                    [factor.key]: Number(e.target.value),
-                  }))
-                }
+                disabled={isBusy}
+                onChange={(event) => {
+                  const value = Number(event.target.value);
+                  setFactors((previous) => ({
+                    ...previous,
+                    [factor.key]: value,
+                  }));
+                }}
                 className="h-1.5 w-full cursor-pointer accent-[#64875B] disabled:opacity-50"
               />
             </div>
@@ -231,14 +411,13 @@ export default function UserInput({
         </div>
       </div>
 
-      {/* Search Button */}
       <button
         type="button"
         onClick={handleSearch}
-        disabled={isLoading}
+        disabled={isBusy}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C77F83] px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#B96E74] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span>{isLoading ? "◌" : "⌕"}</span>
+        <span aria-hidden="true">{isLoading ? "◌" : "⌕"}</span>
         {isLoading ? "กำลังวิเคราะห์พื้นที่..." : "Find Suitable Area"}
       </button>
 

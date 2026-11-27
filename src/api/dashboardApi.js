@@ -3,7 +3,9 @@
 //   ส่วน B: รายการ API ทั้งหมดที่ขอจาก backend ได้
 
 // ---------- ส่วน A: ตัวยิง API กลาง ----------
-const BASE_URL = (import.meta.env?.VITE_API_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+const BASE_URL = (
+  import.meta.env.VITE_API_URL || "https://backend-terrainsight.onrender.com"
+).replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(message, status, body) {
